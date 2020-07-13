@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 
 import ImageCard from "./components/imageCard";
+import ImageSearch from "./components/imageSearch";
 
 function App() {
   const [images, setImages] = useState([]);
@@ -8,6 +9,7 @@ function App() {
   const [term, setTerm] = useState("");
 
   const apiKey = process.env.REACT_APP_PIXELBAY_API_KEY;
+  // eslint-disable-next-line
   const apiUrl = `https://pixabay.com/api/?key=${apiKey}&q=${term}&image_type=photo&pretty=true&category=nature`;
 
   useEffect(() => {
@@ -18,18 +20,32 @@ function App() {
         setIsLoading(false);
       })
       .catch((err) => console.log(err));
-  }, []);
+  }, [term]);
 
   return (
-    <div className="container mx-auto">
-      <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-4">
-        {isLoading ? (
-          <h1 className="text-6xl text-center mx-auto">Loading...</h1>
+    <Fragment>
+      <div className="container mx-auto">
+        <ImageSearch searchText={(text) => setTerm(text)} />
+
+        {!isLoading && images.length === 0 && (
+          <h1 className="text-5xl text-center mx-auto mt-32">No image found</h1>
+        )}
+
+        {!window.navigator.onLine ? (
+          <h1 className="text-5xl text-center mx-auto mt-32">
+            No internet connection!
+          </h1>
+        ) : isLoading ? (
+          <h1 className="text-6xl text-center mx-auto mt-32">Loading...</h1>
         ) : (
-          images.map((image) => <ImageCard key={image.id} image={image} />)
+          <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-4">
+            {images.map((image) => (
+              <ImageCard key={image.id} image={image} />
+            ))}
+          </div>
         )}
       </div>
-    </div>
+    </Fragment>
   );
 }
 
